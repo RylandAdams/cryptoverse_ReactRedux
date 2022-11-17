@@ -5,7 +5,8 @@ import millify from 'millify';
 import { Col, Row, Typography, Select } from 'antd';
 import { MoneyCollectOutlined, DollarCircleOutlined, FundOutlined, ExclamationCircleOutlined, StopOutlined, TrophyOutlined, CheckOutlined, NumberOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
-import { useGetCryptoDetailsQuery } from '../services/cryptoApi';
+import { useGetCryptoDetailsQuery, useGetCryptoHistoryQuery } from '../services/cryptoApi';
+import LineChart from './LineChart';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -14,6 +15,7 @@ const CryptoDetails = () => {
   const { coinId } = useParams();
   const [timePeriod, setTimePeriod] = useState('7d')
   const { data, isFetching } = useGetCryptoDetailsQuery(coinId)
+  const { data: coinHistory} = useGetCryptoHistoryQuery({ coinId, timePeriod })
   const cryptoDetails = data?.data?.coin
 
   if(isFetching) return 'Loading...'
@@ -49,13 +51,14 @@ const CryptoDetails = () => {
           </p>
       </Col>
       <Select 
-      defaultValue='7d' c
-      lassName='select-timeperiod' 
+      defaultValue='7d' 
+      className='select-timeperiod' 
       placeholder='Select Time Period'
       onChange={(value) => setTimePeriod(value)}
       > 
         {time.map((date) => <Option key={date}>{date}</Option>)}
       </Select>
+      {/* <LineChart coinHistory={coinHistory} currentPrice={millify(cryptoDetails.price)} coinName={cryptoDetails.name} /> */}
       <Col className='stats-container'>
         <Col className='coin-value-statistics'>
           <Col className='coin-value-statistics-heading'>
@@ -93,6 +96,29 @@ const CryptoDetails = () => {
                </Col>
                <Text className='stats'>{value}</Text>
             </Col>
+          ))}
+        </Col>
+      </Col>
+      <Col className='coin-desc-link'>
+        <Row className='coin-desc'>
+          <Title level={3} className='coin-details-heading'>
+            what is {cryptoDetails.name}
+            {HTMLReactParser(cryptoDetails.description)}
+          </Title>
+        </Row>
+        <Col className='coin-links'>
+          <Title level={3} className='coin-details-heading'>
+            {cryptoDetails.name} Links
+          </Title>
+          {cryptoDetails.links.map((link) => (
+            <Row className='coin-link' key={link.name}>
+              <Title level={5} className='link-name'>
+                {link.type}
+              </Title>
+              <a href={link.url} target='_blank' rel='noreferrer' >
+                {link.name}
+              </a>
+            </Row>
           ))}
         </Col>
       </Col>
